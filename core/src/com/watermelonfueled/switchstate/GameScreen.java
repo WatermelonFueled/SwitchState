@@ -5,6 +5,9 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
 
 /**
  * Screen for playing the game.
@@ -16,6 +19,8 @@ public class GameScreen implements Screen {
 
     public enum GameState { RUNNING, PAUSED, GAMEOVER }
     GameState gameState;
+
+    public Button pauseButton, resumeButton;
 
     private Level level;
 
@@ -40,6 +45,7 @@ public class GameScreen implements Screen {
         setFrozen();
 
         setupInput();
+        setupUI();
         loadLevel();
     }
 
@@ -51,6 +57,40 @@ public class GameScreen implements Screen {
         multiplexer.addProcessor(game.stage);                   // stage for UI
         multiplexer.addProcessor(new GameInput(player, this));  // player control
         Gdx.input.setInputProcessor(multiplexer);
+    }
+
+    /**
+     * Creates the UI: pausing, resuming
+     */
+    private void setupUI() {
+        pauseButton = new Button(AssetManager.pauseButton);
+        pauseButton.setPosition(game.stage.getWidth()-35,game.stage.getHeight()-35);
+        pauseButton.setSize(32f, 32f);
+        pauseButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                setGamePaused();
+                pauseButton.setVisible(false);
+                resumeButton.setVisible(true);
+            }
+        });
+
+        resumeButton = new Button(AssetManager.resumeButton);
+        resumeButton.setText("RESUME");
+        resumeButton.setPosition(game.stage.getWidth() / 2, game.stage.getHeight() / 2);
+        resumeButton.setSize(128f, 32f);
+        resumeButton.setVisible(false);
+        resumeButton.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float x, float y){
+                setGameRunning();
+                pauseButton.setVisible(true);
+                resumeButton.setVisible(false);
+            }
+        });
+
+        game.stage.addActor(pauseButton);
+        game.stage.addActor(resumeButton);
     }
 
     /**
@@ -87,6 +127,7 @@ public class GameScreen implements Screen {
             case GAMEOVER:
                 break;
         }
+        game.stage.draw();
     }
 
     /**
@@ -131,8 +172,8 @@ public class GameScreen implements Screen {
      * Moves camera to follow the player in the center while staying within the bounds of the level.
      */
     private void repositionCamera() {
-        camera.position.x = player.getX();
-        camera.position.y = player.getY();
+        camera.position.x = player.getX()+player.getWidth()/2;
+        camera.position.y = player.getY()+player.getHeight()/2;
         camera.position.x = MathUtils.clamp(camera.position.x, game.CAM_WIDTH/2, level.mapWidth-game.CAM_WIDTH/2);
         camera.position.y = MathUtils.clamp(camera.position.y, camera.viewportHeight/2, level.mapHeight-camera.viewportHeight/2);
     }

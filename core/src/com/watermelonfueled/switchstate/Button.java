@@ -17,9 +17,7 @@ public class Button extends Actor {
      * Constructor for a button.
      * @param region the {@link TextureRegion} for the button's appearance
      */
-    public Button(TextureRegion region) {
-        this.region = region;
-    }
+    public Button(TextureRegion region) { this.region = region; }
 
     /**
      * Sets the text of the button.

@@ -17,6 +17,9 @@ public class AssetManager {
     public static TextureRegion[] levelBGs;
     private static final int LEVEL_BG_WIDTH = 256;
 
+    // UI
+    public static TextureRegion pauseButton, resumeButton;
+
     // Player related
     public static Animation playerFrozenAnimation;
     public static TextureRegion[] playerFrozenFrames;
@@ -38,6 +41,7 @@ public class AssetManager {
         texture = new Texture("texture.png");
         font = new BitmapFont();
 
+        loadUI();
         loadPlayer();
         loadEnemies();
         loadLevelBGs(1);
@@ -46,9 +50,17 @@ public class AssetManager {
     }
 
     /**
+     * Loads assets for the UI
+     */
+    private static void loadUI() {
+        pauseButton = new TextureRegion(texture,0,384,32,32);
+        resumeButton = new TextureRegion(texture,0,416,32,32);
+    }
+
+    /**
      * Loads assets for {@link Player}; Frozen animation, Moving animation
      */
-    public static void loadPlayer() {
+    private static void loadPlayer() {
         Gdx.app.log(TAG,"Loading player assets...");
         playerFrozenFrames = new TextureRegion[FROZEN_FRAME_COUNT];
         playerMovingFrames = new TextureRegion[FROZEN_FRAME_COUNT];
@@ -67,7 +79,7 @@ public class AssetManager {
     /**
      * Loads assets for {@link Enemy}; Moving animation; Sleep animation
      */
-    public static void loadEnemies() {
+    private static void loadEnemies() {
         Gdx.app.log(TAG,"Loading enemies assets...");
         //enemy1
         Gdx.app.debug(TAG,"Loading enemy 1...");
@@ -90,7 +102,7 @@ public class AssetManager {
      * Loads the backgrounds for each {@link Level}.
      * @param levelCount the number of levels in the game
      */
-    public static void loadLevelBGs(int levelCount) {
+    private static void loadLevelBGs(int levelCount) {
         Gdx.app.log(TAG, "Loading level backgrounds...");
         levelBGs = new TextureRegion[levelCount];
         for (int i = 0; i < levelCount; i++) {
