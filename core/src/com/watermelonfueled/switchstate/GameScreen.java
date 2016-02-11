@@ -20,7 +20,7 @@ public class GameScreen implements Screen {
     public enum GameState { RUNNING, PAUSED, GAMEOVER }
     GameState gameState;
 
-    public Button pauseButton, resumeButton;
+    public Button pauseButton, resumeButton, mainMenuButton;
 
     private Level level;
 
@@ -60,37 +60,53 @@ public class GameScreen implements Screen {
     }
 
     /**
-     * Creates the UI: pausing, resuming
+     * Creates the UI: pause, resume, main menu
      */
     private void setupUI() {
+        Gdx.app.debug(TAG, "Creating game UI...");
         pauseButton = new Button(AssetManager.pauseButton);
-        pauseButton.setPosition(game.stage.getWidth()-35,game.stage.getHeight()-35);
         pauseButton.setSize(32f, 32f);
+        pauseButton.setPosition(game.stage.getWidth() - pauseButton.getWidth() * 1.2f,
+                game.stage.getHeight() - pauseButton.getWidth() * 1.2f);
         pauseButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                setGamePaused();
-                pauseButton.setVisible(false);
-                resumeButton.setVisible(true);
+                pause();
             }
         });
+
+        // Pause menu
+        float pauseMenuButtonWidth = 128f;
 
         resumeButton = new Button(AssetManager.resumeButton);
         resumeButton.setText("RESUME");
-        resumeButton.setPosition(game.stage.getWidth() / 2, game.stage.getHeight() / 2);
-        resumeButton.setSize(128f, 32f);
-        resumeButton.setVisible(false);
-        resumeButton.addListener(new ClickListener(){
+        resumeButton.setSize(pauseMenuButtonWidth, pauseMenuButtonWidth / 4);
+        resumeButton.setPosition((game.stage.getWidth() - pauseMenuButtonWidth) / 2,
+                game.stage.getHeight() / 2 + 2f);
+        resumeButton.addListener(new ClickListener() {
             @Override
-            public void clicked(InputEvent event, float x, float y){
+            public void clicked(InputEvent event, float x, float y) {
                 setGameRunning();
-                pauseButton.setVisible(true);
-                resumeButton.setVisible(false);
             }
         });
 
-        game.stage.addActor(pauseButton);
-        game.stage.addActor(resumeButton);
+        mainMenuButton = new Button(AssetManager.resumeButton);
+        mainMenuButton.setText("MAIN MENU");
+        mainMenuButton.setSize(pauseMenuButtonWidth, pauseMenuButtonWidth / 4);
+        mainMenuButton.setPosition((game.stage.getWidth() - pauseMenuButtonWidth) / 2,
+                game.stage.getHeight() / 2 - 2f - pauseMenuButtonWidth / 4);
+        mainMenuButton.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float x, float y){
+                Gdx.app.log(TAG, "Switching to start screen...");
+                game.setScreen(game.startScreen);
+            }
+        });
+        //TODO confirm dialog when moving to main menu
+
+        setPauseMenuVisible(false);
+
+        Gdx.app.debug(TAG, "Created game UI.");
     }
 
     /**
@@ -100,14 +116,6 @@ public class GameScreen implements Screen {
         level = new Level();
         game.renderer.setLevel(level);
         player.setPosition(10, 15);
-    }
-
-    /**
-     * Called when screen becomes current screen of the game.
-     */
-    public void show() {
-        setGameRunning();
-        resize(Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
     }
 
     /**
@@ -123,11 +131,10 @@ public class GameScreen implements Screen {
                 update(delta);
                 break;
             case PAUSED:
-                break;
             case GAMEOVER:
+                game.renderer.draw(gameTime);
                 break;
         }
-        game.stage.draw();
     }
 
     /**
@@ -196,20 +203,50 @@ public class GameScreen implements Screen {
      * Called when the application is paused. Is also called before application is destroyed.
      */
     public void pause() {
-        setGamePaused(); //TODO pause menu
+        setGamePaused();
+        setPauseMenuVisible(true);
     }
 
     /**
      * Called when the application is resumed.
      */
     public void resume() {
-        setGameRunning(); //TODO keep at pause menu for manual resume
+
+    }
+
+    /**
+     * Shows or hides the pause menu
+     * @param visible true for showing the pause menu, false hides pause menu
+     */
+    private void setPauseMenuVisible(boolean visible){
+        if (visible){
+            resumeButton.setVisible(true);
+            mainMenuButton.setVisible(true);
+        } else {
+            resumeButton.setVisible(false);
+            mainMenuButton.setVisible(false);
+        }
+    }
+
+    /**
+     * Called when screen becomes current screen of the game.
+     */
+    public void show() {
+        resize(Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
+        game.stage.addActor(pauseButton);
+        game.stage.addActor(resumeButton);
+        game.stage.addActor(mainMenuButton);
+        setGameRunning();
     }
 
     /**
      * Called when this screen is no longer the displayed screen for the game.
      */
     public void hide() {
+        pause();
+        pauseButton.remove();
+        resumeButton.remove();
+        mainMenuButton.remove();
     }
 
     /**
@@ -231,7 +268,10 @@ public class GameScreen implements Screen {
     /**
      * Sets game state to running.
      */
-    public void setGameRunning() { gameState = GameState.RUNNING; }
+    public void setGameRunning() {
+        gameState = GameState.RUNNING;
+        setPauseMenuVisible(false);
+    }
 
     /**
      * Sets game state to paused.

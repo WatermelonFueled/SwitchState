@@ -18,7 +18,7 @@ public class AssetManager {
     private static final int LEVEL_BG_WIDTH = 256;
 
     // UI
-    public static TextureRegion pauseButton, resumeButton;
+    public static TextureRegion pauseButton, resumeButton, backArrow;
 
     // Player related
     public static Animation playerFrozenAnimation;
@@ -55,6 +55,7 @@ public class AssetManager {
     private static void loadUI() {
         pauseButton = new TextureRegion(texture,0,384,32,32);
         resumeButton = new TextureRegion(texture,0,416,32,32);
+        backArrow = new TextureRegion(texture,64,448,64,64);
     }
 
     /**

@@ -72,6 +72,7 @@ public class Renderer implements Disposable{
                 break;
         }
         batch.end();
+        game.stage.draw(); //draw UI
     }
 
     /**
@@ -106,7 +107,7 @@ public class Renderer implements Disposable{
     /**
      * Clears the screen (OpenGL) and resets the camera and spritebatch in preparation for a new draw.
      */
-    private void clear(){
+    public void clear(){
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         camera.update();
         batch.setProjectionMatrix(camera.combined);

@@ -95,4 +95,12 @@ public class SwitchStateGame extends Game{
         progress.putInteger("unlockedLevels", unlockedLevels);
         progress.flush();
     }
+
+    public boolean savedProgressExists(){
+        if (currentLevel > 1 || currentStage > 1) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

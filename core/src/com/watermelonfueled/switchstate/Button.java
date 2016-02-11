@@ -39,7 +39,9 @@ public class Button extends Actor {
         batch.draw(region, getX(),getY(),getOriginX(),getOriginY(),getWidth(),getHeight(),1f,1f,0);
         // Draw button text, if any
         if (text != null) {
-            AssetManager.font.draw(batch, text, getX(), getY(), getWidth(), Align.center, true);
+            AssetManager.font.draw(batch, text,
+                    getX(), getY()+getHeight()/2+AssetManager.font.getCapHeight()/2,
+                    getWidth(), Align.center, true);
         }
 
     }
