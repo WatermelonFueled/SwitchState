@@ -1,7 +1,8 @@
 package com.watermelonfueled.switchstate;
 
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+
+import java.util.Arrays;
 
 /**
  * Pattern of movement for moving enemies/obstacles
@@ -10,8 +11,9 @@ public class MovePattern {
 
     public enum LoopMode { CIRCULAR, PINGPONG, ONCE };  // 1>2>3>1~, 1>2>3>2>1~, 1>2>3.
     private LoopMode loopMode;
-    private float duration;                             // time span of the complete move pattern
+    private float duration;
     private Vector2[] points;                           // vertex points of the movement pattern
+    private float[] segmentStartTimes, segmentDurations;
 
     /**
      * Constructor for MovePattern.
@@ -25,6 +27,7 @@ public class MovePattern {
      */
     public MovePattern setDuration(float duration) {
         this.duration = duration;
+        if (points != null && segmentStartTimes == null){ calculateSegmentTimes(); }
         return this;
     }
 
@@ -85,7 +88,26 @@ public class MovePattern {
                 }
                 break;
         }
+        if (duration > 0 && segmentStartTimes == null){ calculateSegmentTimes(); }
         return this;
+    }
+
+    /**
+     * Calculates the durations between points and start times of each segment. Only call after points and duration are set.
+     */
+    private void calculateSegmentTimes(){
+        float distance = 0;
+        segmentStartTimes = new float[points.length-1];
+        segmentDurations = new float[segmentStartTimes.length];
+        for (int i = 0; i < segmentStartTimes.length; i++){
+            segmentStartTimes[i] = distance;
+            segmentDurations[i] = points[i].dst(points[i+1]);
+            distance += segmentDurations[i];
+        }
+        for (int i = 0; i < segmentStartTimes.length; i++){
+            segmentStartTimes[i] *= duration / distance;
+            segmentDurations[i] *= duration / distance;
+        }
     }
 
     /**
@@ -95,8 +117,15 @@ public class MovePattern {
      * @return false if no update occurred because the move pattern had completed, otherwise true
      */
     public boolean update(float time, Vector2 vec){
-        // return null if end of non looping pattern
+        // return false if end of non looping pattern
         if (loopMode == LoopMode.ONCE && time > duration) { return false; }
+
+        float progressTime = time % duration;           // time progressed in move pattern
+        int i = segmentIndexSearch(progressTime);       // get index of current segment
+        progressTime -= segmentStartTimes[i];           // time progressed in segment
+        vec.set(points[i]).lerp(points[i+1], progressTime/segmentDurations[i]);
+
+        /*
         // segments progressed in pattern
         float progress = (time % duration) / duration * (points.length - 1);
         // which segment (also starting vector2 index)
@@ -105,6 +134,21 @@ public class MovePattern {
         float segmentProgress = progress - segment;
         // linear interpolation from start to end of segment
         vec.set(points[segment]).lerp(points[segment + 1], segmentProgress);
+        */
         return true;
+    }
+
+    /**
+     * Finds the index of the current segment according to the time.
+     * @param time current time within pattern duration
+     * @return index of current segment
+     */
+    private int segmentIndexSearch(float time){
+        int index = Arrays.binarySearch(segmentStartTimes, time);
+        if (index >= 0) {
+            return index;
+        } else {
+            return -index - 2;
+        }
     }
 }
