@@ -6,7 +6,7 @@ import com.badlogic.gdx.math.Vector2;
 /**
  * Player class. Extends on superclass by adding velocity and direction.
  */
-public class Player extends GameRectangle{
+public class Player extends GameRectangle {
     private final int MAX_SPEED = 25; // units/s
     private float rotation;
     private Vector2 velocity;

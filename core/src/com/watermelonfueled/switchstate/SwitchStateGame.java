@@ -4,9 +4,9 @@ import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 
 /**
@@ -20,13 +20,14 @@ public class SwitchStateGame extends Game{
     public final float CAM_WIDTH = 50f;
 
     public Preferences progress;        // players saved progress
+    public final int LEVEL_COUNT = 1;   // total number of levels in the game
     public int currentLevel, currentStage, unlockedLevels;
 
-    public Screen startScreen, gameScreen;
-
+    public StartScreen startScreen;
+    public GameScreen gameScreen;
     public Renderer renderer;
     public Stage stage;
-    public OrthographicCamera camera;   // TODO unified camera throughout game
+    public OrthographicCamera camera;
 
     /**
      * Called when game is launched. Sets up all the necessary resources for the game.
@@ -36,6 +37,8 @@ public class SwitchStateGame extends Game{
         Gdx.app.log(TAG, "Game started.");
         Gdx.app.debug(TAG, "Loading assets...");
         // TODO loading screen
+        Json json = new Json();
+
         AssetManager.load();
         loadProgress();
         Gdx.app.debug(TAG, "Finished loading assets.");
@@ -47,7 +50,7 @@ public class SwitchStateGame extends Game{
         renderer = new Renderer(this, camera);
         startScreen = new StartScreen(this);
         gameScreen = new GameScreen(this);
-        renderer.setGameScreen((GameScreen)gameScreen);
+        renderer.setGameScreen(gameScreen);
 
         Gdx.app.log(TAG,"Initializing start screen...");
         this.setScreen(startScreen);

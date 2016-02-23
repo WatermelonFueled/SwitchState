@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.utils.Align;
+import com.watermelonfueled.switchstate.AssetManager;
 
 /**
  * General UI button for use by player in menus and in game overlay/HUD.
@@ -40,7 +41,7 @@ public class Button extends Actor {
         // Draw button text, if any
         if (text != null) {
             AssetManager.font.draw(batch, text,
-                    getX(), getY()+getHeight()/2+AssetManager.font.getCapHeight()/2,
+                    getX(), getY()+getHeight()/2+ AssetManager.font.getCapHeight()/2,
                     getWidth(), Align.center, true);
         }
 

@@ -18,78 +18,83 @@ public class MovePattern {
     /**
      * Constructor for MovePattern.
      */
-    public MovePattern() { }
+    public MovePattern(float duration, int loop, float[] pointsX, float[] pointsY) {
+        this.duration = duration;
+        setLoopMode(loop);
+        setPoints(pointsX,pointsY);
+        calculateSegmentTimes();
+    }
 
     /**
-     * Sets the duration of the move pattern.
-     * @param duration time duration (s)
-     * @return the MovePattern for convenient method chaining.
+     * Set loop mode. Used when loading level data json files with an int corresponding to the loopmodes
+     * @param mode 1 for loop once, 2 for circular, 3 for pingpong
      */
-    public MovePattern setDuration(float duration) {
-        this.duration = duration;
-        if (points != null && segmentStartTimes == null){ calculateSegmentTimes(); }
-        return this;
+    private void setLoopMode(int mode){
+        switch (mode){
+            default:
+            case 1:
+                setLoopOnce();
+                break;
+            case 2:
+                setLoopCircular();
+                break;
+            case 3:
+                setLoopPingpong();
+                break;
+        }
     }
 
     /**
      * Sets the loop mode to non-looping
-     * @return the MovePattern for convenient method chaining.
      */
-    public MovePattern setLoopOnce() {
+    public void setLoopOnce() {
         loopMode = LoopMode.ONCE;
-        return this;
     }
 
     /**
      * Sets the loop mode to circular looping
-     * @return the MovePattern for convenient method chaining.
      */
-    public MovePattern setLoopCircular() {
+    public void setLoopCircular() {
         loopMode = LoopMode.CIRCULAR;
-        return this;
     }
 
     /**
      * Sets the loop mode to ping pong looping
-     * @return the MovePattern for convenient method chaining.
      */
-    public MovePattern setLoopPingpong() {
+    public void setLoopPingpong() {
         loopMode = LoopMode.PINGPONG;
-        return this;
     }
 
     /**
      * Sets the vertices of the move pattern.
-     * @param points x and y coordinates in the format of  x1,y1,x2,y2 etc
-     * @return the MovePattern for convenient method chaining.
+     * @param pointsX x coordinates
+     * @param pointsY y coordinates
      */
-    public MovePattern setPoints(float... points){
+    public void setPoints(float[] pointsX, float[] pointsY){
         switch (loopMode){
             case CIRCULAR:
-                this.points = new Vector2[points.length / 2 + 1];
+                points = new Vector2[pointsX.length + 1];
                 break;
             case PINGPONG:
-                this.points = new Vector2[points.length - 1];
+                points = new Vector2[pointsX.length * 2 - 1];
                 break;
             case ONCE:
-                this.points = new Vector2[points.length / 2];
+                points = new Vector2[pointsX.length];
                 break;
         }
-        for (int i = 0; i < points.length; i += 2){
-            this.points[i/2] = new Vector2(points[i],points[i+1]);
+        for (int i = 0; i < pointsX.length; i++){
+            points[i] = new Vector2(pointsX[i],pointsY[i]);
         }
         switch (loopMode){
             case CIRCULAR:
-                this.points[points.length/2] = this.points[0];
+                points[points.length - 1] = points[0];
                 break;
             case PINGPONG:
-                for (int i = points.length/2; i < points.length - 1; i++){
-                    this.points[i] = this.points[this.points.length - i - 1];
+                for (int i = points.length/2 + 1; i < points.length; i++){
+                    points[i] = points[points.length - i - 1];
                 }
                 break;
         }
-        if (duration > 0 && segmentStartTimes == null){ calculateSegmentTimes(); }
-        return this;
     }
 
     /**

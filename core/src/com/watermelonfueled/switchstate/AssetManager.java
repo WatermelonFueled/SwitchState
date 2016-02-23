@@ -17,21 +17,19 @@ public class AssetManager {
     public static TextureRegion[] levelBGs;
     private static final int LEVEL_BG_WIDTH = 256;
 
+    private static AnimationFactory animationFactory;
+
     // UI
     public static TextureRegion pauseButton, resumeButton, backArrow;
 
     // Player related
     public static Animation playerFrozenAnimation;
-    public static TextureRegion[] playerFrozenFrames;
-    private static final int FROZEN_FRAME_COUNT = 20;
     public static Animation playerMovingAnimation;
-    public static TextureRegion[] playerMovingFrames;
 
     // Enemy related
-    public static Animation enemy1Animation;
-    public static TextureRegion[] enemy1Frames;
-    private static final int ENEMY1_FRAME_COUNT = 8;
-    public static TextureRegion enemy1Sleep;
+    private static final int ENEMY_COUNT = 1;
+    public static Animation[] enemyAnimations = new Animation[ENEMY_COUNT];
+    //public static Animation[] enemySleepAnimations = new Animation[ENEMY_COUNT];
 
     /**
      * Loads all the assets
@@ -40,6 +38,8 @@ public class AssetManager {
         Gdx.app.log(TAG,"Loading assets...");
         texture = new Texture("texture.png");
         font = new BitmapFont();
+
+        animationFactory = AnimationFactory.instantiate();
 
         loadUI();
         loadPlayer();
@@ -62,18 +62,9 @@ public class AssetManager {
      * Loads assets for {@link Player}; Frozen animation, Moving animation
      */
     private static void loadPlayer() {
-        Gdx.app.log(TAG,"Loading player assets...");
-        playerFrozenFrames = new TextureRegion[FROZEN_FRAME_COUNT];
-        playerMovingFrames = new TextureRegion[FROZEN_FRAME_COUNT];
-        for (int i = 0; i < FROZEN_FRAME_COUNT; i++){
-            playerFrozenFrames[i] = new TextureRegion(texture,i*48,0,48,64);
-            playerMovingFrames[i] = new TextureRegion(texture,i*48,64,48,64);
-        }
-        playerFrozenAnimation = new Animation(0.1f, playerFrozenFrames);
-        playerFrozenAnimation.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);
-        playerMovingAnimation = new Animation(0.1f, playerMovingFrames);
-        playerMovingAnimation.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);
-
+        Gdx.app.log(TAG, "Loading player assets...");
+        playerMovingAnimation = animationFactory.getAnimation(1,texture);
+        playerFrozenAnimation = animationFactory.getAnimation(0,texture);
         Gdx.app.log(TAG,"Player loaded.");
     }
 
@@ -82,20 +73,10 @@ public class AssetManager {
      */
     private static void loadEnemies() {
         Gdx.app.log(TAG,"Loading enemies assets...");
-        //enemy1
-        Gdx.app.debug(TAG,"Loading enemy 1...");
-        enemy1Frames = new TextureRegion[ENEMY1_FRAME_COUNT];
-        TextureRegion face1 = new TextureRegion(texture,960,0,32,32);
-        for (int i = 0; i < ENEMY1_FRAME_COUNT - 3; i++){
-            enemy1Frames[i] = face1;
+        // for each enemy type
+        for (int i = 0; i < ENEMY_COUNT; i++) {
+            enemyAnimations[i] = animationFactory.getAnimation(i+2,texture);
         }
-        enemy1Frames[ENEMY1_FRAME_COUNT-2] = face1;
-        enemy1Frames[ENEMY1_FRAME_COUNT-3] = new TextureRegion(texture,992,0,32,32);
-        enemy1Frames[ENEMY1_FRAME_COUNT-1] = new TextureRegion(texture,960,32,32,32);
-        enemy1Animation = new Animation(0.05f, enemy1Frames);
-        enemy1Animation.setPlayMode(Animation.PlayMode.LOOP);
-        enemy1Sleep = new TextureRegion(texture,992,32,32,32);
-
         Gdx.app.log(TAG,"Enemies loaded.");
     }
 

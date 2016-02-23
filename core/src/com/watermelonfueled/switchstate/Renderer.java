@@ -64,11 +64,11 @@ public class Renderer implements Disposable{
         switch (screen.playerState){
             case FROZEN:
                 drawPlayer(AssetManager.playerFrozenAnimation.getKeyFrame(gameTime));
-                drawEnemies(AssetManager.enemy1Sleep);
+                drawEnemies(gameTime);
                 break;
             case MOVING:
                 drawPlayer(AssetManager.playerMovingAnimation.getKeyFrame(gameTime));
-                drawEnemies(AssetManager.enemy1Animation.getKeyFrame(gameTime));
+                drawEnemies(gameTime);
                 break;
         }
         batch.end();
@@ -96,11 +96,12 @@ public class Renderer implements Disposable{
 
     /**
      * Draws the enemies.
-     * @param keyframe current animation keyframe of the enemies
+     * @param time
      */
-    private void drawEnemies(TextureRegion keyframe) {
+    private void drawEnemies(float time) {
         for (Enemy enemy : level.enemies) {
-            batch.draw(keyframe, enemy.getX(), enemy.getY(), enemy.getWidth(), enemy.getHeight());
+            batch.draw(AssetManager.enemyAnimations[enemy.getAnimationId()].getKeyFrame(time),
+                    enemy.getX(), enemy.getY(), enemy.getWidth(), enemy.getHeight());
         }
     }
 

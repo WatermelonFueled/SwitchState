@@ -2,6 +2,9 @@ package com.watermelonfueled.switchstate;
 
 
 import com.badlogic.gdx.math.Vector2;
+import com.watermelonfueled.switchstate.GameRectangle;
+import com.watermelonfueled.switchstate.GameScreen;
+import com.watermelonfueled.switchstate.MovePattern;
 
 /**
  * Enemies in the game.
@@ -12,6 +15,7 @@ public class Enemy extends GameRectangle {
     private Vector2 translation;    // Translation amount updated according to the movement pattern
     private Vector2 startPoint;
     private float moveTime;         // Time spent moving
+    private int animationId;
 
     /**
      * Constructor for an enemy of specified size. Will require it's starting point to be set afterwards.
@@ -54,6 +58,22 @@ public class Enemy extends GameRectangle {
      */
     public void setPattern(MovePattern pattern) {
         this.pattern = pattern;
+    }
+
+    /**
+     * Sets the animation for this enemy.
+     * @param id the id of the animation. See {@link AssetManager}
+     */
+    public void setAnimationId(int id) {
+        animationId = id;
+    }
+
+    /**
+     * Gets the animation Id
+     * @return animation id
+     */
+    public int getAnimationId() {
+        return animationId;
     }
 
     /**

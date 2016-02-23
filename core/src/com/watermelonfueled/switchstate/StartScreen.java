@@ -2,6 +2,7 @@ package com.watermelonfueled.switchstate;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
@@ -12,7 +13,9 @@ public class StartScreen implements Screen {
     final SwitchStateGame game;
     private final String TAG = "StartScreen";   // log tag
 
+    private Group levelLoadMenu;
     private Button startButton, loadLevelButton, backToMainButton;
+    private Button[] levelButtons;
     private final float BUTTON_WIDTH = 256f;
 
     /**
@@ -22,13 +25,15 @@ public class StartScreen implements Screen {
     public StartScreen(SwitchStateGame game){
         Gdx.app.log(TAG, "Start screen started.");
         this.game = game;
-        setupUI();
+        setupMainUI();
+        setupLevelLoaderUI();
+        setLevelLoaderVisible(false);
     }
 
     /**
-     * Creates the UI; menu buttons
+     * Creates the UI for the main menu; menu buttons
      */
-    private void setupUI() {
+    private void setupMainUI() {
         Gdx.app.debug(TAG, "Creating start screen UI...");
         startButton = new Button(AssetManager.resumeButton);
         if (game.savedProgressExists()){
@@ -56,21 +61,52 @@ public class StartScreen implements Screen {
             }
         });
 
+
+        Gdx.app.debug(TAG, "Created start screen UI.");
+    }
+
+    /**
+     * Creates the level loading menu UI
+     */
+    private void setupLevelLoaderUI() {
+        // level loading menu group holding all of its elements
+        levelLoadMenu = new Group();
+        levelLoadMenu.setSize(game.stage.getWidth() - 40, game.stage.getHeight() - 40);
+        levelLoadMenu.setPosition((game.stage.getWidth()-levelLoadMenu.getWidth())/2, (game.stage.getHeight()-levelLoadMenu.getHeight())/2);
+
+        // button for each level of the game
+        levelButtons = new Button[game.LEVEL_COUNT];
+        Button levelButton;
+        for (int i = 0; i < levelButtons.length; i++){
+            levelButtons[i] = new Button(AssetManager.resumeButton);
+            levelButton = levelButtons[i];
+            levelButton.setText("Level: " + (i + 1));
+            levelButton.setSize(BUTTON_WIDTH, BUTTON_WIDTH / 4);
+            levelButton.setPosition(0, levelLoadMenu.getHeight() - levelButton.getHeight() - i * BUTTON_WIDTH / 3);
+            final int index = i+1;
+            levelButton.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    game.currentLevel = index;
+                    startGame();
+                }
+            });
+            levelLoadMenu.addActor(levelButton);
+        }
+
+        // back arrow
         backToMainButton = new Button(AssetManager.backArrow);
         backToMainButton.setSize(32f,32f);
-        backToMainButton.setPosition(game.stage.getWidth() - backToMainButton.getWidth() * 1.2f,
+        backToMainButton.setPosition(levelLoadMenu.getWidth() - backToMainButton.getWidth() * 1.2f,
                 backToMainButton.getHeight() * 1.2f);
-        backToMainButton.addListener(new ClickListener(){
+        backToMainButton.addListener(new ClickListener() {
             @Override
-            public void clicked(InputEvent event, float x, float y){
+            public void clicked(InputEvent event, float x, float y) {
                 setLevelLoaderVisible(false);
             }
         });
+        levelLoadMenu.addActor(backToMainButton);
 
-        //TODO level loader menu
-
-        setLevelLoaderVisible(false);
-        Gdx.app.debug(TAG, "Created start screen UI.");
     }
 
     /**
@@ -81,11 +117,11 @@ public class StartScreen implements Screen {
         if (visible) {
             startButton.setVisible(false);
             loadLevelButton.setVisible(false);
-            backToMainButton.setVisible(true);
+            levelLoadMenu.setVisible(true);
         } else {
             startButton.setVisible(true);
             loadLevelButton.setVisible(true);
-            backToMainButton.setVisible(false);
+            levelLoadMenu.setVisible(false);
         }
     }
 
@@ -103,6 +139,8 @@ public class StartScreen implements Screen {
      */
     public void startGame() {
         Gdx.app.log(TAG, "Switching to game screen...");
+        game.gameScreen.loadLevel(game.currentLevel);
+        setLevelLoaderVisible(false);
         game.setScreen(game.gameScreen);
     }
 
@@ -134,13 +172,16 @@ public class StartScreen implements Screen {
         resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         game.stage.addActor(startButton);
         game.stage.addActor(loadLevelButton);
-        game.stage.addActor(backToMainButton);
+        game.stage.addActor(levelLoadMenu);
     }
 
+    /**
+     * Called when this screen is removed as the screen to display
+     */
     public void hide() {
         startButton.remove();
         loadLevelButton.remove();
-        backToMainButton.remove();
+        levelLoadMenu.remove();
     }
 
     public void dispose() {

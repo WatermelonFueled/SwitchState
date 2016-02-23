@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.Align;
 
 /**
  * Screen for playing the game.
@@ -46,7 +45,8 @@ public class GameScreen implements Screen {
 
         setupInput();
         setupUI();
-        loadLevel();
+
+        level = new Level();
     }
 
     /**
@@ -110,12 +110,12 @@ public class GameScreen implements Screen {
     }
 
     /**
-     * Loads the {@link Level}.
+     * Loads the level
+     * @param levelId the level to load
      */
-    private void loadLevel(){
-        level = new Level();
+    public void loadLevel(int levelId){
+        level.loadLevel(levelId, player);
         game.renderer.setLevel(level);
-        player.setPosition(10, 15);
     }
 
     /**
