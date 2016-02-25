@@ -5,6 +5,8 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
@@ -19,7 +21,8 @@ public class GameScreen implements Screen {
     public enum GameState { RUNNING, PAUSED, GAMEOVER }
     GameState gameState;
 
-    public Button pauseButton, resumeButton, mainMenuButton;
+    private Group gameUI, pauseMenu;
+    private Button pauseButton, resumeButton, mainMenuButton, controllerFront, controllerBack;
 
     private Level level;
 
@@ -40,11 +43,9 @@ public class GameScreen implements Screen {
         camera = game.camera;
         player = new Player();
 
-        setGamePaused();
-        setFrozen();
-
-        setupInput();
         setupUI();
+        setupInput();
+        setGamePaused();
 
         level = new Level();
     }
@@ -55,7 +56,7 @@ public class GameScreen implements Screen {
     private void setupInput() {
         InputMultiplexer multiplexer = new InputMultiplexer();
         multiplexer.addProcessor(game.stage);                   // stage for UI
-        multiplexer.addProcessor(new GameInput(player, this));  // player control
+        multiplexer.addProcessor(new GameInput(player, this, controllerFront, controllerBack));  // player control
         Gdx.input.setInputProcessor(multiplexer);
     }
 
@@ -74,7 +75,14 @@ public class GameScreen implements Screen {
                 pause();
             }
         });
-
+        controllerBack = new Button(AssetManager.controllerBack);
+        controllerBack.setSize(64, 64);
+        controllerFront = new Button(AssetManager.controllerFront);
+        controllerFront.setSize(32,32);
+        gameUI = new Group();
+        gameUI.addActor(pauseButton);
+        gameUI.addActor(controllerBack);
+        gameUI.addActor(controllerFront);
         // Pause menu
         float pauseMenuButtonWidth = 128f;
 
@@ -95,14 +103,19 @@ public class GameScreen implements Screen {
         mainMenuButton.setSize(pauseMenuButtonWidth, pauseMenuButtonWidth / 4);
         mainMenuButton.setPosition((game.stage.getWidth() - pauseMenuButtonWidth) / 2,
                 game.stage.getHeight() / 2 - 2f - pauseMenuButtonWidth / 4);
-        mainMenuButton.addListener(new ClickListener(){
+        mainMenuButton.addListener(new ClickListener() {
             @Override
-            public void clicked(InputEvent event, float x, float y){
+            public void clicked(InputEvent event, float x, float y) {
                 Gdx.app.log(TAG, "Switching to start screen...");
                 game.setScreen(game.startScreen);
             }
         });
+        pauseMenu = new Group();
+        pauseMenu.addActor(resumeButton);
+        pauseMenu.addActor(mainMenuButton);
+
         //TODO confirm dialog when moving to main menu
+
 
         setPauseMenuVisible(false);
 
@@ -220,11 +233,9 @@ public class GameScreen implements Screen {
      */
     private void setPauseMenuVisible(boolean visible){
         if (visible){
-            resumeButton.setVisible(true);
-            mainMenuButton.setVisible(true);
+            pauseMenu.setVisible(true);
         } else {
-            resumeButton.setVisible(false);
-            mainMenuButton.setVisible(false);
+            pauseMenu.setVisible(false);
         }
     }
 
@@ -233,9 +244,8 @@ public class GameScreen implements Screen {
      */
     public void show() {
         resize(Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
-        game.stage.addActor(pauseButton);
-        game.stage.addActor(resumeButton);
-        game.stage.addActor(mainMenuButton);
+        game.stage.addActor(gameUI);
+        game.stage.addActor(pauseMenu);
         setGameRunning();
     }
 
@@ -244,9 +254,8 @@ public class GameScreen implements Screen {
      */
     public void hide() {
         pause();
-        pauseButton.remove();
-        resumeButton.remove();
-        mainMenuButton.remove();
+        pauseMenu.remove();
+        gameUI.remove();
     }
 
     /**
@@ -258,12 +267,21 @@ public class GameScreen implements Screen {
     /**
      * Sets player state to frozen.
      */
-    public void setFrozen() { playerState = PlayerState.FROZEN; stateTime = 0f; }
+    public void setFrozen() {
+        playerState = PlayerState.FROZEN; stateTime = 0f;
+        controllerBack.setVisible(false);
+        controllerFront.setVisible(false);
+    }
 
     /**
      * Sets player state to moving.
      */
-    public void setMoving() { playerState = PlayerState.MOVING; stateTime = 0f; }
+    public void setMoving() {
+        playerState = PlayerState.MOVING;
+        stateTime = 0f;
+        controllerBack.setVisible(true);
+        controllerFront.setVisible(true);
+    }
 
     /**
      * Sets game state to running.
@@ -276,7 +294,10 @@ public class GameScreen implements Screen {
     /**
      * Sets game state to paused.
      */
-    public void setGamePaused() { gameState = GameState.PAUSED; }
+    public void setGamePaused() {
+        gameState = GameState.PAUSED;
+        setFrozen();
+    }
 
     /**
      * Sets game state to game over

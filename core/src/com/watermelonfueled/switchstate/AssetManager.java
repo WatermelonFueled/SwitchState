@@ -20,7 +20,7 @@ public class AssetManager {
     private static AnimationFactory animationFactory;
 
     // UI
-    public static TextureRegion pauseButton, resumeButton, backArrow;
+    public static TextureRegion pauseButton, resumeButton, backArrow, controllerBack, controllerFront;
 
     // Player related
     public static Animation playerFrozenAnimation;
@@ -56,6 +56,8 @@ public class AssetManager {
         pauseButton = new TextureRegion(texture,0,384,32,32);
         resumeButton = new TextureRegion(texture,0,416,32,32);
         backArrow = new TextureRegion(texture,64,448,64,64);
+        controllerBack = new TextureRegion(texture,128,384,64,64);
+        controllerFront = new TextureRegion(texture,32,384,32,32);
     }
 
     /**
