@@ -5,7 +5,8 @@ package com.watermelonfueled.switchstate;
  */
 public class LevelData {
     public MovePatternData[] movePatternData;
-    public com.watermelonfueled.switchstate.EnemyData[] enemyData;
+    public EnemyData[] enemyData;
+    public WallData[] wallData;
     public float playerX, playerY;
     public int mapW, mapH;
     public LevelData(){}

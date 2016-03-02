@@ -45,7 +45,15 @@ public class GameRectangle {
      * @param y amount to translate in y axis
      */
     public void translate(float x, float y) {
+        translateX(x);
+        translateY(y);
+    }
+
+    public void translateX(float x) {
         this.x += x;
+    }
+
+    public void translateY(float y) {
         this.y += y;
     }
 
@@ -55,8 +63,23 @@ public class GameRectangle {
      * @return true if there is a collision, false otherwise
      */
     public boolean collides(GameRectangle obj) {
-        if (x + width < obj.x || x > obj.x + obj.width ||
-                y + height < obj.y || y > obj.y + obj.height){
+        if (collidesX(obj) && collidesY(obj)){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean collidesX(GameRectangle obj) {
+        if (x + width < obj.x || x > obj.x + obj.width) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    public boolean collidesY(GameRectangle obj) {
+        if (y + height < obj.y || y > obj.y + obj.height) {
             return false;
         } else {
             return true;

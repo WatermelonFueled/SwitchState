@@ -52,6 +52,8 @@ public class GameInput extends InputAdapter {
                         controllerBack.getStage().getHeight() - y - controllerBack.getOriginY());
                 controllerFront.setPosition(x - controllerFront.getOriginX(),
                         controllerFront.getStage().getHeight() - y - controllerFront.getOriginY());
+                controllerBack.setVisible(true);
+                controllerFront.setVisible(true);
                 break;
             case PAUSED:
             case GAMEOVER:
@@ -71,7 +73,6 @@ public class GameInput extends InputAdapter {
         switch (gameScreen.gameState){
             case RUNNING:
                 float angle = MathUtils.atan2(y - down.y, down.x - x);
-                Gdx.app.log("ANGLE","angle: "+angle);
                 float clampedDistRatio = MathUtils.clamp(down.dst(x, y),0,MAX_DISTANCE) / MAX_DISTANCE;
                 player.setDirection(angle, clampedDistRatio);
                 controllerFront.setPosition(clampedDistRatio * -16 * MathUtils.cos(angle) + controllerBack.getX()+controllerBack.getOriginX()-controllerFront.getOriginX(),
@@ -98,6 +99,8 @@ public class GameInput extends InputAdapter {
             case RUNNING:
                 gameScreen.setFrozen();
                 player.stop();
+                controllerBack.setVisible(false);
+                controllerFront.setVisible(false);
                 break;
             case PAUSED:
 

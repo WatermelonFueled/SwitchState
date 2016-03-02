@@ -21,6 +21,7 @@ public class AssetManager {
 
     // UI
     public static TextureRegion pauseButton, resumeButton, backArrow, controllerBack, controllerFront;
+    public static TextureRegion[] levelButtonBackgrounds;
 
     // Player related
     public static Animation playerFrozenAnimation;

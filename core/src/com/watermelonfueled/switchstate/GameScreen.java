@@ -5,7 +5,6 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -30,8 +29,7 @@ public class GameScreen implements Screen {
     public enum PlayerState { FROZEN, MOVING }
     PlayerState playerState;
 
-    public volatile float stateTime;
-    public volatile float gameTime;
+    public volatile float frozenTime, gameTime, frozenTimeMax;
 
     /**
      * Constructor sets up game in (selected) level.
@@ -42,10 +40,12 @@ public class GameScreen implements Screen {
         this.game = game;
         camera = game.camera;
         player = new Player();
+        frozenTime = frozenTimeMax = 5f;
 
         setupUI();
         setupInput();
         setGamePaused();
+        setFrozen();
 
         level = new Level();
     }
@@ -83,6 +83,8 @@ public class GameScreen implements Screen {
         gameUI.addActor(pauseButton);
         gameUI.addActor(controllerBack);
         gameUI.addActor(controllerFront);
+        controllerFront.setVisible(false);
+        controllerBack.setVisible(false);
         // Pause menu
         float pauseMenuButtonWidth = 128f;
 
@@ -138,7 +140,6 @@ public class GameScreen implements Screen {
     public void render(float delta) {
         switch (gameState){
             case RUNNING:
-                stateTime += delta;
                 gameTime += delta;
                 game.renderer.draw(gameTime);
                 update(delta);
@@ -160,17 +161,33 @@ public class GameScreen implements Screen {
                 for (Enemy enemy : level.enemies) {
                     enemy.move(delta);
                 }
+                frozenTime -= delta;
+                if (frozenTime <= 0) { frozenTime = 0; setMoving(); }
                 break;
             case MOVING:
-                player.move(delta);
+                frozenTime = MathUtils.clamp(frozenTime+delta,0,frozenTimeMax);
+                player.moveX(delta);
+                for (GameRectangle wall : level.walls) {
+                    if (wall.collides(player)) {
+                        player.cancelMoveX(delta);
+                        break;
+                    }
+                }
+                player.moveY(delta);
+                for (GameRectangle wall : level.walls) {
+                    if (wall.collides(player)) {
+                        player.cancelMoveY(delta);
+                        break;
+                    }
+                }
                 checkBounds();
-                //TODO wall collision -> cancel movement
                 //enemies
                 for (Enemy enemy : level.enemies) {
                     if (enemy.collides(player)) {
                         enemy.setPattern(null);
+                    } else {
+                        enemy.move(delta);
                     }
-                    enemy.move(delta);
                 }
                 repositionCamera();
                 break;
@@ -268,9 +285,7 @@ public class GameScreen implements Screen {
      * Sets player state to frozen.
      */
     public void setFrozen() {
-        playerState = PlayerState.FROZEN; stateTime = 0f;
-        controllerBack.setVisible(false);
-        controllerFront.setVisible(false);
+        playerState = PlayerState.FROZEN;
     }
 
     /**
@@ -278,9 +293,6 @@ public class GameScreen implements Screen {
      */
     public void setMoving() {
         playerState = PlayerState.MOVING;
-        stateTime = 0f;
-        controllerBack.setVisible(true);
-        controllerFront.setVisible(true);
     }
 
     /**

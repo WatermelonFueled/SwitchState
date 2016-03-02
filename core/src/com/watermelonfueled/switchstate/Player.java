@@ -25,6 +25,14 @@ public class Player extends GameRectangle {
                     -velocity.y * delta);
     }
 
+    public void moveX(float delta) {
+        translateX( -velocity.x * delta );
+    }
+
+    public void moveY(float delta) {
+        translateY( -velocity.y * delta);
+    }
+
     /**
      * Called to cancel a previous move. Used for walls and other impassable obstacles
      * @param delta time (s) since last update in game
@@ -32,6 +40,14 @@ public class Player extends GameRectangle {
     public void cancelMove(float delta) {
         translate(  velocity.x * delta,
                     velocity.y * delta);
+    }
+
+    public void cancelMoveX(float delta) {
+        translateX(velocity.x * delta);
+    }
+
+    public void cancelMoveY(float delta) {
+        translateY(velocity.y * delta);
     }
 
     /**
